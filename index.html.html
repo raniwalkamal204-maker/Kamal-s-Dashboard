@@ -1,0 +1,1718 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kamal's Dashboard | Green SM</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%2306b6d4' width='100' height='100' rx='20'/><path d='M22 58 Q40 22 58 52 Q68 68 82 38' stroke='white' stroke-width='9' fill='none' stroke-linecap='round'/><path d='M22 62 Q40 26 58 56' stroke='%23facc15' stroke-width='3.5' fill='none' stroke-linecap='round'/></svg>">
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            primary: { 50: '#eff6ff', 100: '#dbeafe', 200: '#bfdbfe', 300: '#93c5fd', 400: '#60a5fa', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 800: '#1e40af', 900: '#1e3a8a' },
+            accent: { 50: '#f0fdf4', 100: '#dcfce7', 200: '#bbf7d0', 300: '#86efac', 400: '#4ade80', 500: '#22c55e', 600: '#16a34a', 700: '#15803d' }
+          }
+        }
+      }
+    }
+  </script>
+  
+  <!-- SheetJS (xlsx) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  
+  <!-- DataTables -->
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css" />
+  <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.dataTables.min.css" />
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
+  
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  
+  <style>
+    [x-cloak] { display: none !important; }
+    .dt-buttons { margin-bottom: 0.5rem; }
+    .dataTables_wrapper .dataTables_filter input {
+      border: 1px solid #d1d5db; border-radius: 0.375rem; padding: 0.25rem 0.5rem;
+    }
+    .dark .dataTables_wrapper .dataTables_filter input,
+    .dark .dataTables_wrapper .dataTables_length select {
+      background: #1f2937; border-color: #4b5563; color: #e5e7eb;
+    }
+    .dark table.dataTable thead th, .dark table.dataTable tbody td {
+      border-color: #374151;
+    }
+    .dark .dataTables_info, .dark .dataTables_paginate { color: #9ca3af; }
+    .spinner {
+      border: 3px solid rgba(59, 130, 246, 0.2);
+      border-top-color: #3b82f6;
+      border-radius: 50%;
+      width: 40px; height: 40px;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .card-hover { transition: transform 0.2s, box-shadow 0.2s; }
+    .card-hover:hover { transform: translateY(-2px); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); }
+    .sticky-filters { position: sticky; top: 0; z-index: 40; }
+    .tab-active { border-bottom: 3px solid #3b82f6; color: #2563eb; font-weight: 600; }
+    .dark .tab-active { border-bottom-color: #60a5fa; color: #60a5fa; }
+    .matrix-cell { min-width: 110px; font-size: 0.7rem; line-height: 1.2; }
+    .status-online { background: #dcfce7; color: #166534; }
+    .status-offline { background: #fee2e2; color: #991b1b; }
+    .status-low { background: #fef9c3; color: #854d0e; }
+    .dark .status-online { background: #14532d; color: #86efac; }
+    .dark .status-offline { background: #7f1d1d; color: #fca5a5; }
+    .dark .status-low { background: #713f12; color: #fde047; }
+    
+    /* Green SM Official Style Animated Logo */
+    .gsm-logo {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      background: linear-gradient(145deg, #06b6d4 0%, #0891b2 50%, #0e7490 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 6px 20px rgba(6, 182, 212, 0.45), inset 0 1px 0 rgba(255,255,255,0.3);
+      animation: logoFloat 3s ease-in-out infinite;
+      transition: transform 0.3s;
+    }
+    .gsm-logo:hover { transform: scale(1.08) rotate(-3deg); }
+    .gsm-logo svg {
+      width: 34px;
+      height: 34px;
+      filter: drop-shadow(0 2px 3px rgba(0,0,0,0.2));
+      animation: logoDraw 2.5s ease-in-out infinite;
+    }
+    @keyframes logoFloat {
+      0%, 100% { transform: translateY(0); box-shadow: 0 6px 20px rgba(6,182,212,0.45); }
+      50% { transform: translateY(-3px); box-shadow: 0 10px 28px rgba(6,182,212,0.55); }
+    }
+    @keyframes logoDraw {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+    
+    /* Theme variants */
+    html.theme-green body { background: linear-gradient(160deg, #ecfdf5 0%, #d1fae5 40%, #a7f3d0 100%); }
+    html.theme-green .bg-white { background-color: rgba(255,255,255,0.92) !important; }
+    html.theme-silver body { background: linear-gradient(160deg, #f8fafc 0%, #e2e8f0 50%, #cbd5e1 100%); }
+    html.theme-silver .bg-white { background-color: rgba(255,255,255,0.95) !important; }
+    html.theme-night body { background: linear-gradient(160deg, #0f172a 0%, #1e293b 50%, #334155 100%); }
+    html.dark body, html.theme-night body { color: #e2e8f0; }
+    
+    /* International clean card style */
+    .card-3d {
+      background: linear-gradient(145deg, rgba(255,255,255,0.95), rgba(255,255,255,0.85));
+      border: 1px solid rgba(255,255,255,0.6);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.8);
+      backdrop-filter: blur(8px);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .dark .card-3d, .theme-night .card-3d {
+      background: linear-gradient(145deg, rgba(30,41,59,0.9), rgba(15,23,42,0.85));
+      border-color: rgba(71,85,105,0.5);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    }
+    .card-3d:hover {
+      transform: translateY(-4px) scale(1.02);
+      box-shadow: 0 16px 40px rgba(0,0,0,0.12);
+    }
+  </style>
+</head>
+<body class="h-full bg-gradient-to-br from-slate-50 via-blue-50/30 to-cyan-50/40 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800 text-gray-900 dark:text-gray-100 transition-all duration-300">
+  
+  <!-- ==================== DATA STORE ==================== -->
+  <!-- 
+    IMPORTANT: All uploaded data is stored here as a JavaScript array of objects.
+    Each object has keys matching the Excel column names exactly.
+    You can inspect window.driverData in the browser console after upload.
+  -->
+  <script>
+    // Global data store - populated after successful file upload
+    window.driverData = [];          // Full raw rows from Excel/CSV
+    window.uniqueDates = [];         // Sorted unique dates YYYY-MM-DD
+    window.filteredData = [];        // Currently filtered subset
+    window.charts = {};              // Chart.js instances
+    window.dataTable = null;         // DataTables instance
+  </script>
+
+  <!-- Loading Overlay -->
+  <div id="loadingOverlay" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center">
+    <div class="bg-white dark:bg-gray-800 rounded-xl p-8 flex flex-col items-center shadow-2xl">
+      <div class="spinner mb-4"></div>
+      <p class="text-lg font-medium" id="loadingText">Processing file...</p>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed top-4 right-4 z-50 hidden transform transition-all duration-300">
+    <div class="bg-white dark:bg-gray-800 border-l-4 px-5 py-3 rounded-lg shadow-lg flex items-center gap-3 max-w-md">
+      <i id="toastIcon" class="fas text-xl"></i>
+      <span id="toastMessage" class="text-sm font-medium"></span>
+    </div>
+  </div>
+
+  <!-- Generic Drill-Down Modal (for any card click) -->
+  <div id="drillModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-6xl max-h-[90vh] flex flex-col">
+      <div class="flex items-center justify-between p-5 border-b dark:border-gray-700">
+        <div>
+          <h3 class="text-xl font-bold flex items-center gap-2" id="drillTitle">
+            <i class="fas fa-search-plus text-primary-500"></i>
+            Drill Down
+          </h3>
+          <p class="text-sm text-gray-500 dark:text-gray-400 mt-1" id="drillSubtitle"></p>
+        </div>
+        <button onclick="closeDrillModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-2xl leading-none">&times;</button>
+      </div>
+      
+      <!-- Summary + Day Comparison -->
+      <div class="px-5 pt-4 pb-2 border-b dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50">
+        <div id="drillSummaryCards" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3 mb-3"></div>
+        <div id="drillDayComparison" class="overflow-x-auto"></div>
+      </div>
+      
+      <div class="p-5 overflow-auto flex-1">
+        <div class="flex items-center justify-between mb-3">
+          <div class="text-sm text-gray-500 dark:text-gray-400" id="drillInfo"></div>
+          <input type="text" id="drillSearch" placeholder="Search driver..." class="text-sm border dark:border-gray-600 rounded-lg px-3 py-1.5 bg-white dark:bg-gray-800 w-48" oninput="filterDrillTable()" />
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm" id="drillTable">
+            <thead class="bg-gray-100 dark:bg-gray-700 sticky top-0" id="drillTableHead"></thead>
+            <tbody id="drillTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="p-4 border-t dark:border-gray-700 flex justify-between items-center">
+        <span class="text-xs text-gray-400">Click any row value to understand the source data</span>
+        <button onclick="closeDrillModal()" class="px-5 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main App -->
+  <div class="min-h-full flex flex-col">
+    
+    <!-- Header -->
+    <header class="bg-white dark:bg-gray-800 border-b dark:border-gray-700 shadow-sm sticky top-0 z-30">
+      <div class="max-w-[1600px] mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
+          <!-- Animated Green SM Logo (official style) -->
+          <div class="gsm-logo" title="Green SM">
+            <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M18 62 Q40 18 60 55 Q70 72 88 35" stroke="white" stroke-width="11" stroke-linecap="round" fill="none"/>
+              <path d="M18 66 Q40 22 60 59" stroke="#facc15" stroke-width="4" stroke-linecap="round" fill="none"/>
+            </svg>
+          </div>
+          <div>
+            <h1 class="text-xl font-bold tracking-tight bg-gradient-to-r from-cyan-600 to-emerald-500 bg-clip-text text-transparent dark:from-cyan-400 dark:to-emerald-300">Kamal's Dashboard</h1>
+            <p class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
+              <span class="font-semibold text-cyan-600 dark:text-cyan-400">GREEN</span><span class="font-bold text-yellow-500">SM</span>
+              <span class="mx-1">•</span> Driver Performance Tracker
+            </p>
+          </div>
+        </div>
+        
+        <div class="flex items-center gap-2 flex-wrap">
+          <!-- Upload Button -->
+          <label class="cursor-pointer inline-flex items-center gap-2 px-4 py-2.5 bg-primary-600 hover:bg-primary-700 text-white rounded-lg font-medium shadow-md transition-all active:scale-95">
+            <i class="fas fa-cloud-upload-alt"></i>
+            <span>Upload Latest Report</span>
+            <input type="file" id="fileUpload" accept=".xlsx,.xls,.csv" class="hidden" />
+          </label>
+          
+          <!-- Clear Data -->
+          <button onclick="clearAllData()" class="px-3 py-2.5 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-lg text-sm font-medium transition-all">
+            <i class="fas fa-trash-alt mr-1"></i> Clear
+          </button>
+          
+          <!-- Theme Selector -->
+          <div class="relative">
+            <button onclick="toggleThemeMenu()" class="p-2.5 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-all flex items-center gap-1.5" title="Change theme">
+              <i class="fas fa-palette"></i>
+              <span class="text-xs hidden sm:inline" id="currentThemeLabel">Day</span>
+            </button>
+            <div id="themeMenu" class="hidden absolute right-0 top-full mt-1 bg-white dark:bg-gray-800 border dark:border-gray-600 rounded-xl shadow-xl py-2 z-50 min-w-[140px]">
+              <button onclick="setTheme('day')" class="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
+                <span class="w-3 h-3 rounded-full bg-blue-400"></span> Day
+              </button>
+              <button onclick="setTheme('night')" class="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
+                <span class="w-3 h-3 rounded-full bg-slate-700"></span> Night
+              </button>
+              <button onclick="setTheme('silver')" class="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
+                <span class="w-3 h-3 rounded-full bg-slate-300"></span> Silver
+              </button>
+              <button onclick="setTheme('green')" class="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
+                <span class="w-3 h-3 rounded-full bg-emerald-400"></span> Green
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- File Info Bar -->
+      <div id="fileInfoBar" class="hidden bg-primary-50 dark:bg-primary-900/30 border-t border-primary-100 dark:border-primary-800 px-4 py-1.5 text-xs text-primary-700 dark:text-primary-300">
+        <div class="max-w-[1600px] mx-auto flex items-center justify-between">
+          <span id="fileInfoText"></span>
+          <span id="dataStats"></span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Empty State -->
+    <div id="emptyState" class="flex-1 flex items-center justify-center p-8">
+      <div class="text-center max-w-md">
+        <div class="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-primary-100 to-accent-100 dark:from-primary-900 dark:to-accent-900 rounded-full flex items-center justify-center">
+          <i class="fas fa-file-excel text-4xl text-primary-500"></i>
+        </div>
+        <h2 class="text-2xl font-bold mb-2">No Data Loaded</h2>
+        <p class="text-gray-500 dark:text-gray-400 mb-6">Upload an Excel (.xlsx) or CSV file containing driver performance data to get started.</p>
+        <label class="cursor-pointer inline-flex items-center gap-2 px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white rounded-xl font-semibold shadow-lg transition-all">
+          <i class="fas fa-upload"></i>
+          Upload Report
+          <input type="file" id="fileUploadEmpty" accept=".xlsx,.xls,.csv" class="hidden" />
+        </label>
+        <p class="mt-4 text-xs text-gray-400">Supports columns: d_date, driver_name, current_driver_status, total_login_hours, completed_orders, GMV, trip_ops_odo, ...</p>
+      </div>
+    </div>
+
+    <!-- Dashboard Content (hidden until data loaded) -->
+    <div id="dashboardContent" class="hidden flex-1 flex flex-col">
+      
+      <!-- Summary Cards (All clickable for drill-down) -->
+      <section class="bg-white dark:bg-gray-800 border-b dark:border-gray-700 sticky top-[73px] z-20 shadow-sm">
+        <div class="max-w-[1600px] mx-auto px-4 py-4">
+          <div class="flex items-center justify-between mb-2">
+            <p class="text-xs text-gray-500 dark:text-gray-400"><i class="fas fa-hand-pointer mr-1"></i> Click any card below to drill-down & verify exact drivers / day-wise values</p>
+          </div>
+          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-9 gap-3" id="summaryCards">
+            <!-- Cards injected by JS -->
+          </div>
+        </div>
+      </section>
+
+      <!-- Filters -->
+      <section class="sticky-filters bg-gray-100 dark:bg-gray-850 border-b dark:border-gray-700 py-3">
+        <div class="max-w-[1600px] mx-auto px-4">
+          <div class="flex flex-wrap items-end gap-3">
+            
+            <!-- Improved Date Selector (Checkboxes) -->
+            <div class="flex flex-col relative">
+              <label class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Dates (Single / Multi)</label>
+              <div class="relative">
+                <button type="button" id="dateDropdownBtn" onclick="toggleDateDropdown()" class="text-sm border dark:border-gray-600 rounded-lg px-3 py-1.5 bg-white dark:bg-gray-800 min-w-[200px] text-left flex items-center justify-between">
+                  <span id="dateDropdownLabel">All dates selected</span>
+                  <i class="fas fa-chevron-down text-xs ml-2"></i>
+                </button>
+                <div id="dateDropdown" class="hidden absolute top-full left-0 mt-1 z-50 bg-white dark:bg-gray-800 border dark:border-gray-600 rounded-lg shadow-xl p-3 min-w-[240px] max-h-64 overflow-y-auto">
+                  <div class="flex gap-2 mb-2 pb-2 border-b dark:border-gray-700">
+                    <button onclick="selectAllDates(true)" class="text-xs px-2 py-1 bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300 rounded">Select All</button>
+                    <button onclick="selectAllDates(false)" class="text-xs px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded">Clear</button>
+                  </div>
+                  <div id="dateCheckboxes" class="space-y-1"></div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Team Leader -->
+            <div class="flex flex-col">
+              <label class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Team Leader</label>
+              <select id="filterGroup" class="text-sm border dark:border-gray-600 rounded-lg px-2 py-1.5 bg-white dark:bg-gray-800 min-w-[120px]">
+                <option value="">All</option>
+              </select>
+            </div>
+            
+            <!-- Supervisor -->
+            <div class="flex flex-col">
+              <label class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Supervisor</label>
+              <select id="filterTeam" class="text-sm border dark:border-gray-600 rounded-lg px-2 py-1.5 bg-white dark:bg-gray-800 min-w-[140px]">
+                <option value="">All</option>
+              </select>
+            </div>
+            
+            <!-- Driver Status -->
+            <div class="flex flex-col">
+              <label class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Driver Status</label>
+              <select id="filterStatus" class="text-sm border dark:border-gray-600 rounded-lg px-2 py-1.5 bg-white dark:bg-gray-800 min-w-[120px]">
+                <option value="">All</option>
+                <option value="ACTIVATED">Activated</option>
+                <option value="DEACTIVATED">Deactivated</option>
+                <option value="BANNED">Banned</option>
+              </select>
+            </div>
+            
+            <!-- Vehicle Status -->
+            <div class="flex flex-col">
+              <label class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Vehicle Status</label>
+              <select id="filterVehicle" class="text-sm border dark:border-gray-600 rounded-lg px-2 py-1.5 bg-white dark:bg-gray-800 min-w-[120px]">
+                <option value="">All</option>
+                <option value="Assigned">Assigned</option>
+                <option value="Not Assigned">Not Assigned</option>
+              </select>
+            </div>
+            
+            <!-- Search -->
+            <div class="flex flex-col flex-1 min-w-[160px]">
+              <label class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Search Name / SAP</label>
+              <input type="text" id="filterSearch" placeholder="Type to search..." class="text-sm border dark:border-gray-600 rounded-lg px-3 py-1.5 bg-white dark:bg-gray-800 w-full" />
+            </div>
+            
+            <button onclick="applyFilters()" class="px-4 py-1.5 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-sm font-medium">
+              <i class="fas fa-filter mr-1"></i> Apply
+            </button>
+            <button onclick="clearFilters()" class="px-3 py-1.5 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-lg text-sm">
+              Clear Filters
+            </button>
+          </div>
+          
+          <!-- Selected Dates Pills (for clear comparison visibility) -->
+          <div id="selectedDatesPills" class="flex flex-wrap gap-1.5 mt-2"></div>
+        </div>
+      </section>
+
+      <!-- Tabs -->
+      <div class="bg-white dark:bg-gray-800 border-b dark:border-gray-700">
+        <div class="max-w-[1600px] mx-auto px-4">
+          <nav class="flex gap-1 overflow-x-auto" id="tabNav">
+            <button data-tab="overview" class="tab-btn tab-active px-4 py-3 text-sm whitespace-nowrap">Overview & Charts</button>
+            <button data-tab="matrix" class="tab-btn px-4 py-3 text-sm whitespace-nowrap text-gray-500 dark:text-gray-400 hover:text-primary-600">Day-wise Performance</button>
+            <button data-tab="online" class="tab-btn px-4 py-3 text-sm whitespace-nowrap text-gray-500 dark:text-gray-400 hover:text-primary-600">Online/Offline Tracker</button>
+            <button data-tab="trips" class="tab-btn px-4 py-3 text-sm whitespace-nowrap text-gray-500 dark:text-gray-400 hover:text-primary-600">Daily Trips Matrix</button>
+            <button data-tab="login" class="tab-btn px-4 py-3 text-sm whitespace-nowrap text-gray-500 dark:text-gray-400 hover:text-primary-600">Login Hours Matrix</button>
+            <button data-tab="km" class="tab-btn px-4 py-3 text-sm whitespace-nowrap text-gray-500 dark:text-gray-400 hover:text-primary-600">Daily KM Matrix</button>
+            <button data-tab="vehicle" class="tab-btn px-4 py-3 text-sm whitespace-nowrap text-gray-500 dark:text-gray-400 hover:text-primary-600">Vehicle Assignment</button>
+            <button data-tab="status" class="tab-btn px-4 py-3 text-sm whitespace-nowrap text-gray-500 dark:text-gray-400 hover:text-primary-600">Status History</button>
+          </nav>
+        </div>
+      </div>
+
+      <!-- Tab Contents -->
+      <main class="flex-1 max-w-[1600px] mx-auto w-full px-4 py-6">
+        
+        <!-- Overview Tab -->
+        <div id="tab-overview" class="tab-content">
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-5">
+              <h3 class="font-semibold mb-4 flex items-center gap-2"><i class="fas fa-chart-line text-primary-500"></i> Daily Online % Trend</h3>
+              <canvas id="chartOnlinePct" height="220"></canvas>
+            </div>
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-5">
+              <h3 class="font-semibold mb-4 flex items-center gap-2"><i class="fas fa-chart-bar text-accent-500"></i> Online vs Offline (Daily)</h3>
+              <canvas id="chartOnlineOffline" height="220"></canvas>
+            </div>
+          </div>
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-5">
+              <h3 class="font-semibold mb-4 flex items-center gap-2"><i class="fas fa-trophy text-yellow-500"></i> Top 10 by Trips</h3>
+              <canvas id="chartTopTrips" height="260"></canvas>
+            </div>
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-5">
+              <h3 class="font-semibold mb-4 flex items-center gap-2"><i class="fas fa-road text-blue-500"></i> Top 10 by KM</h3>
+              <canvas id="chartTopKM" height="260"></canvas>
+            </div>
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-5">
+              <h3 class="font-semibold mb-4 flex items-center gap-2"><i class="fas fa-clock text-purple-500"></i> Top 10 by Login Hours</h3>
+              <canvas id="chartTopLogin" height="260"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Day-wise Performance Matrix -->
+        <div id="tab-matrix" class="tab-content hidden">
+          <div class="bg-white dark:bg-gray-800 rounded-xl shadow overflow-hidden">
+            <div class="p-4 border-b dark:border-gray-700 flex justify-between items-center">
+              <h3 class="font-semibold">Day-wise Performance Matrix</h3>
+              <div class="text-xs text-gray-500">Green = Online • Red = Offline • Yellow = Low activity (&lt;2h)</div>
+            </div>
+            <div class="overflow-x-auto p-2">
+              <table id="matrixTable" class="display nowrap w-full text-xs" style="width:100%"></table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Online/Offline Tracker -->
+        <div id="tab-online" class="tab-content hidden">
+          <div class="bg-white dark:bg-gray-800 rounded-xl shadow overflow-hidden">
+            <div class="p-4 border-b dark:border-gray-700">
+              <h3 class="font-semibold">Online / Offline Tracker</h3>
+              <p class="text-sm text-gray-500 mt-1">Drivers with offline days highlighted. Click headers to sort.</p>
+            </div>
+            <div class="overflow-x-auto p-2">
+              <table id="onlineTable" class="display nowrap w-full text-sm" style="width:100%"></table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Daily Trips Matrix -->
+        <div id="tab-trips" class="tab-content hidden">
+          <div class="bg-white dark:bg-gray-800 rounded-xl shadow overflow-hidden">
+            <div class="p-4 border-b dark:border-gray-700"><h3 class="font-semibold">Daily Completed Trips Matrix</h3></div>
+            <div class="overflow-x-auto p-2">
+              <table id="tripsTable" class="display nowrap w-full text-sm" style="width:100%"></table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Login Hours Matrix -->
+        <div id="tab-login" class="tab-content hidden">
+          <div class="bg-white dark:bg-gray-800 rounded-xl shadow overflow-hidden">
+            <div class="p-4 border-b dark:border-gray-700"><h3 class="font-semibold">Daily Login Hours Matrix</h3></div>
+            <div class="overflow-x-auto p-2">
+              <table id="loginTable" class="display nowrap w-full text-sm" style="width:100%"></table>
+            </div>
+          </div>
+        </div>
+
+        <!-- KM Matrix -->
+        <div id="tab-km" class="tab-content hidden">
+          <div class="bg-white dark:bg-gray-800 rounded-xl shadow overflow-hidden">
+            <div class="p-4 border-b dark:border-gray-700"><h3 class="font-semibold">Daily KM (trip_ops_odo) Matrix</h3></div>
+            <div class="overflow-x-auto p-2">
+              <table id="kmTable" class="display nowrap w-full text-sm" style="width:100%"></table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Vehicle Assignment -->
+        <div id="tab-vehicle" class="tab-content hidden">
+          <div class="bg-white dark:bg-gray-800 rounded-xl shadow overflow-hidden">
+            <div class="p-4 border-b dark:border-gray-700"><h3 class="font-semibold">Vehicle Assignment Tracker</h3></div>
+            <div class="overflow-x-auto p-2">
+              <table id="vehicleTable" class="display nowrap w-full text-sm" style="width:100%"></table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Status History -->
+        <div id="tab-status" class="tab-content hidden">
+          <div class="bg-white dark:bg-gray-800 rounded-xl shadow overflow-hidden">
+            <div class="p-4 border-b dark:border-gray-700"><h3 class="font-semibold">Driver Status History</h3></div>
+            <div class="overflow-x-auto p-2">
+              <table id="statusTable" class="display nowrap w-full text-sm" style="width:100%"></table>
+            </div>
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <script>
+    // ==================== UTILITY FUNCTIONS ====================
+    
+    function showLoading(text = 'Processing file...') {
+      document.getElementById('loadingText').textContent = text;
+      const el = document.getElementById('loadingOverlay');
+      el.classList.remove('hidden');
+      el.classList.add('flex');
+    }
+    
+    function hideLoading() {
+      const el = document.getElementById('loadingOverlay');
+      el.classList.add('hidden');
+      el.classList.remove('flex');
+    }
+    
+    function showToast(message, type = 'success') {
+      const toast = document.getElementById('toast');
+      const icon = document.getElementById('toastIcon');
+      const msg = document.getElementById('toastMessage');
+      const border = toast.querySelector('div');
+      
+      msg.textContent = message;
+      if (type === 'success') {
+        icon.className = 'fas fa-check-circle text-green-500 text-xl';
+        border.className = 'bg-white dark:bg-gray-800 border-l-4 border-green-500 px-5 py-3 rounded-lg shadow-lg flex items-center gap-3 max-w-md';
+      } else {
+        icon.className = 'fas fa-exclamation-circle text-red-500 text-xl';
+        border.className = 'bg-white dark:bg-gray-800 border-l-4 border-red-500 px-5 py-3 rounded-lg shadow-lg flex items-center gap-3 max-w-md';
+      }
+      
+      toast.classList.remove('hidden');
+      setTimeout(() => toast.classList.add('hidden'), 4000);
+    }
+    
+    // ==================== THEME SYSTEM ====================
+    function toggleThemeMenu() {
+      document.getElementById('themeMenu').classList.toggle('hidden');
+    }
+    document.addEventListener('click', e => {
+      const menu = document.getElementById('themeMenu');
+      const btn = e.target.closest('[onclick="toggleThemeMenu()"]');
+      if (menu && !menu.contains(e.target) && !btn) menu.classList.add('hidden');
+    });
+    
+    function setTheme(theme) {
+      const html = document.documentElement;
+      html.classList.remove('dark', 'theme-green', 'theme-silver', 'theme-night');
+      const labels = { day: 'Day', night: 'Night', silver: 'Silver', green: 'Green' };
+      document.getElementById('currentThemeLabel').textContent = labels[theme] || 'Day';
+      
+      if (theme === 'night') {
+        html.classList.add('dark', 'theme-night');
+      } else if (theme === 'green') {
+        html.classList.add('theme-green');
+      } else if (theme === 'silver') {
+        html.classList.add('theme-silver');
+      }
+      // day = default (no extra class)
+      
+      localStorage.setItem('dashboardTheme', theme);
+      document.getElementById('themeMenu').classList.add('hidden');
+      if (window.driverData.length) setTimeout(updateCharts, 50);
+    }
+    
+    // Restore theme
+    (function() {
+      const saved = localStorage.getItem('dashboardTheme') || 'day';
+      setTheme(saved);
+    })();
+    
+    function parseNumber(val) {
+      if (val === null || val === undefined || val === '' || val === '-') return 0;
+      const n = Number(val);
+      return isNaN(n) ? 0 : n;
+    }
+    
+    function formatDate(d) {
+      if (!d) return '';
+      if (typeof d === 'string') return d.slice(0, 10);
+      if (d instanceof Date) return d.toISOString().slice(0, 10);
+      // Excel serial date
+      if (typeof d === 'number') {
+        const date = new Date(Math.round((d - 25569) * 86400 * 1000));
+        return date.toISOString().slice(0, 10);
+      }
+      return String(d).slice(0, 10);
+    }
+    
+    function isOnline(row) {
+      return parseNumber(row.total_login_hours) > 0;
+    }
+    
+    function isActivated(row) {
+      return (row.current_driver_status || '').toUpperCase() === 'ACTIVATED';
+    }
+
+    // ==================== FILE UPLOAD ====================
+    
+    function handleFile(file) {
+      if (!file) return;
+      
+      showLoading('Reading file...');
+      
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          showLoading('Parsing data...');
+          const data = new Uint8Array(e.target.result);
+          const workbook = XLSX.read(data, { type: 'array', cellDates: true });
+          const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+          const json = XLSX.utils.sheet_to_json(firstSheet, { defval: '', raw: false });
+          
+          if (!json || json.length === 0) {
+            hideLoading();
+            showToast('No data found in the file.', 'error');
+            return;
+          }
+          
+          // Normalize keys and dates
+          const normalized = json.map(row => {
+            const obj = {};
+            for (const key of Object.keys(row)) {
+              obj[key.trim()] = row[key];
+            }
+            // Ensure d_date is string YYYY-MM-DD
+            obj.d_date = formatDate(obj.d_date);
+            // Numeric fields
+            obj.total_login_hours = parseNumber(obj.total_login_hours);
+            obj.active_hours = parseNumber(obj.active_hours);
+            obj.completed_orders = parseNumber(obj.completed_orders);
+            obj.GMV = parseNumber(obj.GMV);
+            obj.trip_ops_odo = parseNumber(obj.trip_ops_odo);
+            obj.trip_odo = parseNumber(obj.trip_odo);
+            return obj;
+          });
+          
+          // Store data
+          window.driverData = normalized;
+          
+          // Unique dates sorted
+          window.uniqueDates = [...new Set(normalized.map(r => r.d_date).filter(Boolean))].sort();
+          
+          // ===== SAVE TO LOCALSTORAGE (so data stays until new upload) =====
+          try {
+            const savePayload = {
+              data: normalized,
+              fileName: file.name,
+              uploadedAt: new Date().toISOString(),
+              rowCount: normalized.length
+            };
+            localStorage.setItem('fleetDriverDashboard_data', JSON.stringify(savePayload));
+            console.log('💾 Data saved to localStorage');
+          } catch (e) {
+            console.warn('Could not save to localStorage (maybe too large):', e);
+          }
+          
+          // Update UI
+          showDashboardUI(file.name, normalized.length, false);
+          
+          hideLoading();
+          showToast(`Successfully loaded ${normalized.length.toLocaleString()} records • Thank you Mr. Kamal 🙏`);
+          
+          // Debug helper
+          console.log('✅ Data loaded into window.driverData');
+          console.log('Unique dates:', window.uniqueDates);
+          console.log('Sample row:', window.driverData[0]);
+          
+        } catch (err) {
+          console.error(err);
+          hideLoading();
+          showToast('Failed to parse file: ' + err.message, 'error');
+        }
+      };
+      
+      reader.onerror = function() {
+        hideLoading();
+        showToast('Error reading file.', 'error');
+      };
+      
+      reader.readAsArrayBuffer(file);
+    }
+    
+    // Bind both upload inputs
+    document.getElementById('fileUpload').addEventListener('change', e => {
+      if (e.target.files[0]) handleFile(e.target.files[0]);
+      e.target.value = '';
+    });
+    document.getElementById('fileUploadEmpty').addEventListener('change', e => {
+      if (e.target.files[0]) handleFile(e.target.files[0]);
+      e.target.value = '';
+    });
+    
+    function clearAllData() {
+      if (!confirm('Clear all loaded data? This will also remove the saved data from browser.')) return;
+      window.driverData = [];
+      window.uniqueDates = [];
+      window.filteredData = [];
+      destroyAllTables();
+      destroyAllCharts();
+      localStorage.removeItem('fleetDriverDashboard_data');   // remove saved data
+      document.getElementById('dashboardContent').classList.add('hidden');
+      document.getElementById('emptyState').classList.remove('hidden');
+      document.getElementById('fileInfoBar').classList.add('hidden');
+      showToast('Data cleared. Upload a new file to start again.');
+    }
+    
+    // Helper to show dashboard after data is ready
+    function showDashboardUI(fileName, rowCount, isFromCache = false) {
+      document.getElementById('emptyState').classList.add('hidden');
+      document.getElementById('dashboardContent').classList.remove('hidden');
+      document.getElementById('fileInfoBar').classList.remove('hidden');
+      
+      const cacheBadge = isFromCache 
+        ? `<span class="ml-2 px-2 py-0.5 bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 text-xs rounded-full">Previously uploaded</span>` 
+        : '';
+      
+      document.getElementById('fileInfoText').innerHTML = 
+        `<i class="fas fa-file-excel mr-1"></i> <strong>${fileName}</strong> • ${rowCount.toLocaleString()} rows ${cacheBadge}`;
+      document.getElementById('dataStats').textContent = 
+        `Dates: ${window.uniqueDates[0]} → ${window.uniqueDates[window.uniqueDates.length-1]} (${window.uniqueDates.length} days)`;
+      
+      populateFilters();
+      applyFilters();
+    }
+    
+    // ===== LOAD SAVED DATA ON PAGE START =====
+    function loadSavedData() {
+      try {
+        const saved = localStorage.getItem('fleetDriverDashboard_data');
+        if (!saved) return false;
+        
+        const payload = JSON.parse(saved);
+        if (!payload.data || !Array.isArray(payload.data) || payload.data.length === 0) return false;
+        
+        window.driverData = payload.data;
+        window.uniqueDates = [...new Set(payload.data.map(r => r.d_date).filter(Boolean))].sort();
+        
+        showDashboardUI(payload.fileName || 'Previous Upload', payload.rowCount || payload.data.length, true);
+        
+        const uploadedDate = payload.uploadedAt ? new Date(payload.uploadedAt).toLocaleString() : 'earlier';
+        showToast(`Loaded previous data (${payload.rowCount || payload.data.length} rows) from ${uploadedDate}`);
+        console.log('📂 Loaded data from localStorage');
+        return true;
+      } catch (e) {
+        console.warn('Failed to load saved data:', e);
+        localStorage.removeItem('fleetDriverDashboard_data');
+        return false;
+      }
+    }
+    
+    // Try to load saved data when page opens
+    document.addEventListener('DOMContentLoaded', () => {
+      loadSavedData();
+    });
+
+    // ==================== FILTERS ====================
+    
+    function populateFilters() {
+      const data = window.driverData;
+      
+      // Date checkboxes
+      const container = document.getElementById('dateCheckboxes');
+      container.innerHTML = '';
+      window.uniqueDates.forEach(d => {
+        const label = document.createElement('label');
+        label.className = 'flex items-center gap-2 text-sm cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 px-2 py-1 rounded';
+        label.innerHTML = `
+          <input type="checkbox" value="${d}" checked class="date-cb rounded text-primary-600 focus:ring-primary-500" onchange="onDateChange()" />
+          <span>${d}</span>
+        `;
+        container.appendChild(label);
+      });
+      updateDateLabel();
+      
+      // Groups
+      const groups = [...new Set(data.map(r => r.group_id).filter(Boolean))].sort();
+      const groupSelect = document.getElementById('filterGroup');
+      groupSelect.innerHTML = '<option value="">All</option>';
+      groups.forEach(g => {
+        const opt = document.createElement('option');
+        opt.value = g;
+        opt.textContent = g;
+        groupSelect.appendChild(opt);
+      });
+      
+      // Teams
+      const teams = [...new Set(data.map(r => r.team_id).filter(Boolean))].sort();
+      const teamSelect = document.getElementById('filterTeam');
+      teamSelect.innerHTML = '<option value="">All</option>';
+      teams.forEach(t => {
+        const opt = document.createElement('option');
+        opt.value = t;
+        opt.textContent = t;
+        teamSelect.appendChild(opt);
+      });
+    }
+    
+    function toggleDateDropdown() {
+      const dd = document.getElementById('dateDropdown');
+      dd.classList.toggle('hidden');
+    }
+    
+    // Close dropdown when clicking outside
+    document.addEventListener('click', e => {
+      const btn = document.getElementById('dateDropdownBtn');
+      const dd = document.getElementById('dateDropdown');
+      if (btn && dd && !btn.contains(e.target) && !dd.contains(e.target)) {
+        dd.classList.add('hidden');
+      }
+    });
+    
+    function selectAllDates(checked) {
+      document.querySelectorAll('.date-cb').forEach(cb => cb.checked = checked);
+      onDateChange();
+    }
+    
+    function onDateChange() {
+      updateDateLabel();
+      applyFilters();
+    }
+    
+    function updateDateLabel() {
+      const checked = [...document.querySelectorAll('.date-cb:checked')].map(cb => cb.value);
+      const label = document.getElementById('dateDropdownLabel');
+      const pills = document.getElementById('selectedDatesPills');
+      
+      if (checked.length === 0) {
+        label.textContent = 'No dates selected';
+      } else if (checked.length === window.uniqueDates.length) {
+        label.textContent = `All ${checked.length} dates`;
+      } else if (checked.length === 1) {
+        label.textContent = checked[0];
+      } else {
+        label.textContent = `${checked.length} dates selected`;
+      }
+      
+      // Pills for visual comparison
+      if (pills) {
+        pills.innerHTML = checked.map(d => 
+          `<span class="inline-flex items-center gap-1 px-2 py-0.5 bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300 text-xs rounded-full">
+            ${d}
+            <button onclick="unselectDate('${d}')" class="hover:text-red-500 ml-0.5">&times;</button>
+          </span>`
+        ).join('');
+      }
+    }
+    
+    function unselectDate(date) {
+      const cb = document.querySelector(`.date-cb[value="${date}"]`);
+      if (cb) { cb.checked = false; onDateChange(); }
+    }
+    
+    function getSelectedDates() {
+      return [...document.querySelectorAll('.date-cb:checked')].map(cb => cb.value).sort();
+    }
+    
+    function applyFilters() {
+      if (!window.driverData.length) return;
+      
+      const selectedDates = getSelectedDates();
+      const group = document.getElementById('filterGroup').value;
+      const team = document.getElementById('filterTeam').value;
+      const status = document.getElementById('filterStatus').value;
+      const vehicle = document.getElementById('filterVehicle').value;
+      const search = document.getElementById('filterSearch').value.trim().toLowerCase();
+      
+      window.filteredData = window.driverData.filter(row => {
+        if (selectedDates.length && !selectedDates.includes(row.d_date)) return false;
+        if (group && row.group_id !== group) return false;
+        if (team && row.team_id !== team) return false;
+        if (status && (row.current_driver_status || '').toUpperCase() !== status) return false;
+        if (vehicle && (row.Driver_Car_Status || '') !== vehicle) return false;
+        if (search) {
+          const name = (row.driver_name || '').toLowerCase();
+          const sap = String(row.driver_sap_profile_id || '').toLowerCase();
+          if (!name.includes(search) && !sap.includes(search)) return false;
+        }
+        return true;
+      });
+      
+      updateSummaryCards();
+      updateCharts();
+      updateAllTables();
+    }
+    
+    function clearFilters() {
+      selectAllDates(true);
+      document.getElementById('filterGroup').value = '';
+      document.getElementById('filterTeam').value = '';
+      document.getElementById('filterStatus').value = '';
+      document.getElementById('filterVehicle').value = '';
+      document.getElementById('filterSearch').value = '';
+      applyFilters();
+    }
+    
+    // Auto-apply on some changes
+    document.getElementById('filterSearch').addEventListener('input', debounce(applyFilters, 300));
+    ['filterGroup','filterTeam','filterStatus','filterVehicle'].forEach(id => {
+      document.getElementById(id).addEventListener('change', applyFilters);
+    });
+    
+    function debounce(fn, ms) {
+      let t;
+      return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); };
+    }
+
+    // ==================== SUMMARY CARDS + DRILL DOWN ====================
+    
+    // Store computed metrics for drill-down
+    window._metricsCache = {};
+    
+    function updateSummaryCards() {
+      const data = window.filteredData;
+      const dates = getSelectedDates().length ? getSelectedDates() : window.uniqueDates;
+      
+      // Only Activated for key metrics
+      const activatedRows = data.filter(isActivated);
+      
+      // Unique activated drivers
+      const uniqueActivatedIds = [...new Set(activatedRows.map(r => r.driver_id))];
+      const totalActivated = uniqueActivatedIds.length;
+      
+      // Daily online stats + offline tracking
+      let onlinePctSum = 0;
+      let dayCount = 0;
+      const offlineDrivers = new Map();
+      const onlineDriversSet = new Set();
+      
+      // Day-wise breakdown for comparison
+      const dayBreakdown = {};
+      
+      dates.forEach(date => {
+        const dayRows = activatedRows.filter(r => r.d_date === date);
+        const dayActivated = dayRows.length;
+        const dayOnlineRows = dayRows.filter(isOnline);
+        const dayOnline = dayOnlineRows.length;
+        
+        dayBreakdown[date] = {
+          activated: dayActivated,
+          online: dayOnline,
+          offline: dayActivated - dayOnline,
+          trips: dayRows.reduce((s,r) => s + r.completed_orders, 0),
+          gmv: dayRows.reduce((s,r) => s + r.GMV, 0),
+          km: dayRows.reduce((s,r) => s + r.trip_ops_odo, 0),
+          login: dayRows.reduce((s,r) => s + r.total_login_hours, 0),
+          onlinePct: dayActivated ? (dayOnline / dayActivated * 100) : 0
+        };
+        
+        if (dayActivated > 0) {
+          onlinePctSum += dayBreakdown[date].onlinePct;
+          dayCount++;
+        }
+        
+        dayOnlineRows.forEach(r => onlineDriversSet.add(r.driver_id));
+        
+        dayRows.forEach(r => {
+          if (!isOnline(r)) {
+            if (!offlineDrivers.has(r.driver_id)) {
+              offlineDrivers.set(r.driver_id, {
+                id: r.driver_id,
+                name: r.driver_name,
+                sap: r.driver_sap_profile_id,
+                group: r.group_id,
+                team: r.team_id,
+                status: r.current_driver_status,
+                vehicle: r.Driver_Car_Status,
+                offlineDays: 0,
+                offlineDates: []
+              });
+            }
+            const od = offlineDrivers.get(r.driver_id);
+            od.offlineDays++;
+            od.offlineDates.push(date);
+          }
+        });
+      });
+      
+      const avgOnlinePct = dayCount ? (onlinePctSum / dayCount) : 0;
+      const uniqueOnline = onlineDriversSet.size;
+      
+      // Totals
+      const totalTrips = activatedRows.reduce((s, r) => s + r.completed_orders, 0);
+      const totalGMV = activatedRows.reduce((s, r) => s + r.GMV, 0);
+      const totalKM = activatedRows.reduce((s, r) => s + r.trip_ops_odo, 0);
+      const totalLogin = activatedRows.reduce((s, r) => s + r.total_login_hours, 0);
+      
+      // When multiple dates selected → also divide by number of days for true daily averages
+      const numDays = dates.length || 1;
+      const avgLogin = totalActivated ? (totalLogin / totalActivated / numDays) : 0;
+      const avgTPD = totalActivated ? (totalTrips / totalActivated / numDays) : 0;
+      const avgKM = totalActivated ? (totalKM / totalActivated / numDays) : 0;
+      const offlineCount = offlineDrivers.size;
+      
+      const dayLabel = numDays > 1 ? ` / day (${numDays}d)` : '';
+      
+      // Cache for drill-down
+      window._metricsCache = {
+        activatedRows,
+        uniqueActivatedIds,
+        offlineDrivers,
+        dayBreakdown,
+        dates,
+        totals: { totalActivated, uniqueOnline, offlineCount, totalTrips, totalGMV, totalKM, totalLogin, avgLogin, avgTPD, avgKM, avgOnlinePct }
+      };
+      
+      const cards = [
+        { key: 'activated', label: 'Activated Drivers', value: totalActivated, icon: 'fa-users', color: 'primary', sub: 'Unique in period • Click to drill' },
+        { key: 'online', label: 'Online Drivers', value: uniqueOnline, icon: 'fa-signal', color: 'accent', sub: `Avg Online %: ${avgOnlinePct.toFixed(1)}% • Click` },
+        { key: 'offline', label: 'Offline Drivers', value: offlineCount, icon: 'fa-user-slash', color: 'red', sub: 'Click for full list + dates' },
+        { key: 'trips', label: 'Total Completed Trips', value: totalTrips.toLocaleString(), icon: 'fa-route', color: 'blue', sub: 'Sum of completed_orders • Click' },
+        { key: 'gmv', label: 'Total Revenue (GMV)', value: '₹' + totalGMV.toLocaleString(undefined, {maximumFractionDigits:0}), icon: 'fa-rupee-sign', color: 'green', sub: 'Sum of GMV • Click' },
+        { key: 'km', label: 'Total KM', value: totalKM.toLocaleString(undefined, {maximumFractionDigits:0}), icon: 'fa-tachometer-alt', color: 'indigo', sub: 'Sum of trip_ops_odo • Click' },
+        { key: 'login', label: 'Avg Login Hours', value: avgLogin.toFixed(1), icon: 'fa-clock', color: 'purple', sub: `Per driver${dayLabel} • Click` },
+        { key: 'tpd', label: 'Avg TPD', value: avgTPD.toFixed(2), icon: 'fa-chart-line', color: 'teal', sub: `Trips/Driver${dayLabel} • Click` },
+        { key: 'avgkm', label: 'Avg KM / Driver', value: avgKM.toFixed(1), icon: 'fa-road', color: 'orange', sub: `KM/Driver${dayLabel} • Click` },
+      ];
+      
+      const colorMap = {
+        primary: 'from-blue-500 to-blue-600', accent: 'from-green-500 to-green-600', red: 'from-red-500 to-red-600',
+        blue: 'from-sky-500 to-sky-600', green: 'from-emerald-500 to-emerald-600', indigo: 'from-indigo-500 to-indigo-600',
+        purple: 'from-purple-500 to-purple-600', teal: 'from-teal-500 to-teal-600', orange: 'from-orange-500 to-orange-600'
+      };
+      
+      const container = document.getElementById('summaryCards');
+      container.innerHTML = cards.map(c => `
+        <div class="card-3d rounded-2xl p-3.5 cursor-pointer hover:ring-2 hover:ring-cyan-400/60 transition-all" 
+             onclick="openDrillDown('${c.key}')" title="Click to see detailed breakdown">
+          <div class="flex items-start justify-between">
+            <div>
+              <p class="text-[10px] uppercase tracking-wider text-gray-500 dark:text-gray-400 font-medium">${c.label}</p>
+              <p class="text-xl font-bold mt-0.5 tracking-tight">${c.value}</p>
+              <p class="text-[10px] text-gray-400 mt-0.5">${c.sub}</p>
+            </div>
+            <div class="w-9 h-9 rounded-xl bg-gradient-to-br ${colorMap[c.color]} flex items-center justify-center text-white text-sm shadow-lg" style="box-shadow: 0 4px 12px rgba(0,0,0,0.15)">
+              <i class="fas ${c.icon}"></i>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+    
+    // ==================== DRILL DOWN LOGIC ====================
+    
+    let _drillRows = []; // for search filtering
+    
+    function openDrillDown(metricKey) {
+      const cache = window._metricsCache;
+      if (!cache) return;
+      
+      const { activatedRows, offlineDrivers, dayBreakdown, dates, totals } = cache;
+      const titles = {
+        activated: { title: 'Activated Drivers', icon: 'fa-users', color: 'text-blue-500' },
+        online:    { title: 'Online Drivers', icon: 'fa-signal', color: 'text-green-500' },
+        offline:   { title: 'Offline Drivers', icon: 'fa-user-slash', color: 'text-red-500' },
+        trips:     { title: 'Completed Trips Breakdown', icon: 'fa-route', color: 'text-sky-500' },
+        gmv:       { title: 'Revenue (GMV) Breakdown', icon: 'fa-rupee-sign', color: 'text-emerald-500' },
+        km:        { title: 'KM (trip_ops_odo) Breakdown', icon: 'fa-tachometer-alt', color: 'text-indigo-500' },
+        login:     { title: 'Login Hours Breakdown', icon: 'fa-clock', color: 'text-purple-500' },
+        tpd:       { title: 'TPD (Trips per Driver) Detail', icon: 'fa-chart-line', color: 'text-teal-500' },
+        avgkm:     { title: 'Avg KM per Driver Detail', icon: 'fa-road', color: 'text-orange-500' }
+      };
+      
+      const t = titles[metricKey] || { title: metricKey, icon: 'fa-search', color: 'text-primary-500' };
+      document.getElementById('drillTitle').innerHTML = `<i class="fas ${t.icon} ${t.color}"></i> ${t.title}`;
+      document.getElementById('drillSubtitle').textContent = 
+        `Selected dates: ${dates.join(', ')} • Showing only Activated drivers (unless Offline)`;
+      
+      // Day comparison strip
+      const dayHtml = dates.map(d => {
+        const b = dayBreakdown[d] || {};
+        return `<div class="inline-block bg-white dark:bg-gray-800 border dark:border-gray-600 rounded-lg px-3 py-2 text-center min-w-[110px]">
+          <div class="text-[10px] font-medium text-gray-500">${d.slice(5)}</div>
+          <div class="text-sm font-bold">${metricKey === 'online' || metricKey === 'offline' ? (b.onlinePct||0).toFixed(0)+'%' : 
+            metricKey === 'trips' ? (b.trips||0) :
+            metricKey === 'gmv' ? '₹'+Math.round(b.gmv||0).toLocaleString() :
+            metricKey === 'km' ? Math.round(b.km||0) :
+            metricKey === 'login' ? (b.login||0).toFixed(1)+'h' :
+            (b.activated||0)}</div>
+          <div class="text-[10px] text-gray-400">Act: ${b.activated||0} • On: ${b.online||0}</div>
+        </div>`;
+      }).join('');
+      document.getElementById('drillDayComparison').innerHTML = 
+        `<div class="text-xs font-medium text-gray-500 mb-1">Day-wise Comparison (easy to verify)</div>
+         <div class="flex gap-2 flex-wrap">${dayHtml}</div>`;
+      
+      // Summary mini cards inside modal
+      document.getElementById('drillSummaryCards').innerHTML = `
+        <div class="bg-white dark:bg-gray-800 rounded-lg p-2 border dark:border-gray-600 text-center">
+          <div class="text-[10px] text-gray-500">Activated</div>
+          <div class="font-bold text-lg">${totals.totalActivated}</div>
+        </div>
+        <div class="bg-white dark:bg-gray-800 rounded-lg p-2 border dark:border-gray-600 text-center">
+          <div class="text-[10px] text-gray-500">Online</div>
+          <div class="font-bold text-lg text-green-600">${totals.uniqueOnline}</div>
+        </div>
+        <div class="bg-white dark:bg-gray-800 rounded-lg p-2 border dark:border-gray-600 text-center">
+          <div class="text-[10px] text-gray-500">Offline</div>
+          <div class="font-bold text-lg text-red-600">${totals.offlineCount}</div>
+        </div>
+        <div class="bg-white dark:bg-gray-800 rounded-lg p-2 border dark:border-gray-600 text-center">
+          <div class="text-[10px] text-gray-500">Total Trips</div>
+          <div class="font-bold text-lg">${totals.totalTrips.toLocaleString()}</div>
+        </div>
+        <div class="bg-white dark:bg-gray-800 rounded-lg p-2 border dark:border-gray-600 text-center">
+          <div class="text-[10px] text-gray-500">Total KM</div>
+          <div class="font-bold text-lg">${Math.round(totals.totalKM).toLocaleString()}</div>
+        </div>
+        <div class="bg-white dark:bg-gray-800 rounded-lg p-2 border dark:border-gray-600 text-center">
+          <div class="text-[10px] text-gray-500">Avg Online %</div>
+          <div class="font-bold text-lg">${totals.avgOnlinePct.toFixed(1)}%</div>
+        </div>
+      `;
+      
+      // Build driver-level rows
+      const pivot = new Map();
+      activatedRows.forEach(r => {
+        if (!pivot.has(r.driver_id)) {
+          pivot.set(r.driver_id, {
+            id: r.driver_id,
+            name: r.driver_name || '',
+            sap: r.driver_sap_profile_id || '',
+            group: r.group_id || '',
+            team: r.team_id || '',
+            status: r.current_driver_status || '',
+            vehicle: r.Driver_Car_Status || '',
+            trips: 0, gmv: 0, km: 0, login: 0,
+            onlineDays: 0, offlineDays: 0,
+            offlineDates: [],
+            dayData: {}
+          });
+        }
+        const p = pivot.get(r.driver_id);
+        p.trips += r.completed_orders;
+        p.gmv += r.GMV;
+        p.km += r.trip_ops_odo;
+        p.login += r.total_login_hours;
+        p.dayData[r.d_date] = r;
+        if (isOnline(r)) p.onlineDays++;
+        else { p.offlineDays++; p.offlineDates.push(r.d_date); }
+      });
+      
+      let rows = [...pivot.values()];
+      
+      // Filter based on metric
+      if (metricKey === 'online') {
+        rows = rows.filter(r => r.onlineDays > 0);
+      } else if (metricKey === 'offline') {
+        rows = rows.filter(r => r.offlineDays > 0);
+      }
+      
+      // Sort by relevance
+      if (metricKey === 'trips' || metricKey === 'tpd') rows.sort((a,b) => b.trips - a.trips);
+      else if (metricKey === 'gmv') rows.sort((a,b) => b.gmv - a.gmv);
+      else if (metricKey === 'km' || metricKey === 'avgkm') rows.sort((a,b) => b.km - a.km);
+      else if (metricKey === 'login') rows.sort((a,b) => b.login - a.login);
+      else if (metricKey === 'offline') rows.sort((a,b) => b.offlineDays - a.offlineDays);
+      else rows.sort((a,b) => a.name.localeCompare(b.name));
+      
+      _drillRows = rows;
+      
+      // Table header
+      let headHtml = `<tr>
+        <th class="p-2 text-left sticky left-0 bg-gray-100 dark:bg-gray-700">#</th>
+        <th class="p-2 text-left sticky left-8 bg-gray-100 dark:bg-gray-700">Driver Name</th>
+        <th class="p-2 text-left">SAP ID</th>
+        <th class="p-2 text-left">Supervisor</th>
+        <th class="p-2 text-left">Status</th>
+        <th class="p-2 text-right">Online Days</th>
+        <th class="p-2 text-right">Offline Days</th>
+        <th class="p-2 text-right">Trips</th>
+        <th class="p-2 text-right">KM</th>
+        <th class="p-2 text-right">Login Hrs</th>
+        <th class="p-2 text-right">GMV</th>
+      `;
+      dates.forEach(d => {
+        headHtml += `<th class="p-2 text-center text-xs">${d.slice(5)}<br><span class="font-normal text-gray-400">L / T / KM</span></th>`;
+      });
+      if (metricKey === 'offline') headHtml += `<th class="p-2 text-left">Offline Dates</th>`;
+      headHtml += `</tr>`;
+      document.getElementById('drillTableHead').innerHTML = headHtml;
+      
+      renderDrillTableRows(rows, dates, metricKey);
+      
+      document.getElementById('drillInfo').textContent = 
+        `${rows.length} drivers • Click any number to understand source. Values match the summary card.`;
+      
+      document.getElementById('drillSearch').value = '';
+      
+      const modal = document.getElementById('drillModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+    
+    function renderDrillTableRows(rows, dates, metricKey) {
+      const tbody = document.getElementById('drillTableBody');
+      tbody.innerHTML = rows.map((r, idx) => {
+        let dayCells = dates.map(d => {
+          const day = r.dayData[d];
+          if (!day) return `<td class="p-1 text-center text-gray-300">—</td>`;
+          const online = isOnline(day);
+          const cls = online ? (day.total_login_hours < 2 ? 'bg-yellow-50 dark:bg-yellow-900/30' : 'bg-green-50 dark:bg-green-900/30') : 'bg-red-50 dark:bg-red-900/30';
+          return `<td class="p-1 text-center text-xs ${cls}">
+            ${day.total_login_hours.toFixed(1)}h<br>${day.completed_orders}t / ${day.trip_ops_odo.toFixed(0)}km
+          </td>`;
+        }).join('');
+        
+        const offlineDatesCell = metricKey === 'offline' 
+          ? `<td class="p-2 text-xs text-red-600">${r.offlineDates.join(', ')}</td>` : '';
+        
+        return `<tr class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/40">
+          <td class="p-2 text-gray-400 sticky left-0 bg-white dark:bg-gray-800">${idx+1}</td>
+          <td class="p-2 font-medium sticky left-8 bg-white dark:bg-gray-800">${r.name}</td>
+          <td class="p-2">${r.sap}</td>
+          <td class="p-2 text-xs">${r.team}</td>
+          <td class="p-2"><span class="px-1.5 py-0.5 rounded text-xs ${r.status==='ACTIVATED'?'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200':'bg-red-100 text-red-800'}">${r.status}</span></td>
+          <td class="p-2 text-right text-green-600 font-medium">${r.onlineDays}</td>
+          <td class="p-2 text-right text-red-600 font-medium">${r.offlineDays}</td>
+          <td class="p-2 text-right font-medium">${r.trips}</td>
+          <td class="p-2 text-right">${r.km.toFixed(1)}</td>
+          <td class="p-2 text-right">${r.login.toFixed(1)}</td>
+          <td class="p-2 text-right">₹${Math.round(r.gmv).toLocaleString()}</td>
+          ${dayCells}
+          ${offlineDatesCell}
+        </tr>`;
+      }).join('');
+    }
+    
+    function filterDrillTable() {
+      const q = document.getElementById('drillSearch').value.trim().toLowerCase();
+      const dates = window._metricsCache?.dates || [];
+      const metricKey = document.getElementById('drillTitle').textContent.includes('Offline') ? 'offline' : '';
+      const filtered = q 
+        ? _drillRows.filter(r => (r.name||'').toLowerCase().includes(q) || String(r.sap).includes(q))
+        : _drillRows;
+      renderDrillTableRows(filtered, dates, metricKey);
+      document.getElementById('drillInfo').textContent = `${filtered.length} of ${_drillRows.length} drivers shown`;
+    }
+    
+    function closeDrillModal() {
+      const modal = document.getElementById('drillModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+    
+    // Close on outside click
+    document.getElementById('drillModal').addEventListener('click', e => {
+      if (e.target.id === 'drillModal') closeDrillModal();
+    });
+
+    // ==================== CHARTS ====================
+    
+    function destroyAllCharts() {
+      Object.values(window.charts).forEach(c => { try { c.destroy(); } catch(e){} });
+      window.charts = {};
+    }
+    
+    function updateCharts() {
+      destroyAllCharts();
+      const data = window.filteredData;
+      const dates = getSelectedDates().length ? getSelectedDates() : window.uniqueDates;
+      const activated = data.filter(isActivated);
+      
+      // 1. Daily Online %
+      const onlinePctData = dates.map(date => {
+        const day = activated.filter(r => r.d_date === date);
+        const act = day.length;
+        const on = day.filter(isOnline).length;
+        return act ? +(on / act * 100).toFixed(1) : 0;
+      });
+      
+      const ctx1 = document.getElementById('chartOnlinePct');
+      if (ctx1) {
+        window.charts.onlinePct = new Chart(ctx1, {
+          type: 'line',
+          data: {
+            labels: dates,
+            datasets: [{
+              label: 'Online %',
+              data: onlinePctData,
+              borderColor: '#3b82f6',
+              backgroundColor: 'rgba(59,130,246,0.1)',
+              fill: true,
+              tension: 0.3,
+              pointRadius: 4
+            }]
+          },
+          options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: {
+              y: { beginAtZero: true, max: 100, ticks: { callback: v => v + '%' } }
+            }
+          }
+        });
+      }
+      
+      // 2. Online vs Offline stacked
+      const onlineCounts = dates.map(date => activated.filter(r => r.d_date === date && isOnline(r)).length);
+      const offlineCounts = dates.map(date => activated.filter(r => r.d_date === date && !isOnline(r)).length);
+      
+      const ctx2 = document.getElementById('chartOnlineOffline');
+      if (ctx2) {
+        window.charts.onlineOffline = new Chart(ctx2, {
+          type: 'bar',
+          data: {
+            labels: dates,
+            datasets: [
+              { label: 'Online', data: onlineCounts, backgroundColor: '#22c55e' },
+              { label: 'Offline', data: offlineCounts, backgroundColor: '#ef4444' }
+            ]
+          },
+          options: {
+            responsive: true,
+            scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } }
+          }
+        });
+      }
+      
+      // Top 10 helpers
+      function getTopDrivers(metricKey, limit = 10) {
+        const map = new Map();
+        activated.forEach(r => {
+          if (!map.has(r.driver_id)) {
+            map.set(r.driver_id, { name: r.driver_name || r.driver_id, value: 0 });
+          }
+          map.get(r.driver_id).value += parseNumber(r[metricKey]);
+        });
+        return [...map.values()].sort((a,b) => b.value - a.value).slice(0, limit);
+      }
+      
+      // 3. Top Trips
+      const topTrips = getTopDrivers('completed_orders');
+      const ctx3 = document.getElementById('chartTopTrips');
+      if (ctx3) {
+        window.charts.topTrips = new Chart(ctx3, {
+          type: 'bar',
+          data: {
+            labels: topTrips.map(d => d.name.split(' ').slice(0,2).join(' ')),
+            datasets: [{ label: 'Trips', data: topTrips.map(d => d.value), backgroundColor: '#3b82f6' }]
+          },
+          options: { indexAxis: 'y', responsive: true, plugins: { legend: { display: false } } }
+        });
+      }
+      
+      // 4. Top KM
+      const topKM = getTopDrivers('trip_ops_odo');
+      const ctx4 = document.getElementById('chartTopKM');
+      if (ctx4) {
+        window.charts.topKM = new Chart(ctx4, {
+          type: 'bar',
+          data: {
+            labels: topKM.map(d => d.name.split(' ').slice(0,2).join(' ')),
+            datasets: [{ label: 'KM', data: topKM.map(d => +d.value.toFixed(1)), backgroundColor: '#8b5cf6' }]
+          },
+          options: { indexAxis: 'y', responsive: true, plugins: { legend: { display: false } } }
+        });
+      }
+      
+      // 5. Top Login
+      const topLogin = getTopDrivers('total_login_hours');
+      const ctx5 = document.getElementById('chartTopLogin');
+      if (ctx5) {
+        window.charts.topLogin = new Chart(ctx5, {
+          type: 'bar',
+          data: {
+            labels: topLogin.map(d => d.name.split(' ').slice(0,2).join(' ')),
+            datasets: [{ label: 'Hours', data: topLogin.map(d => +d.value.toFixed(1)), backgroundColor: '#f59e0b' }]
+          },
+          options: { indexAxis: 'y', responsive: true, plugins: { legend: { display: false } } }
+        });
+      }
+    }
+
+    // ==================== TABLES ====================
+    
+    function destroyAllTables() {
+      ['matrixTable','onlineTable','tripsTable','loginTable','kmTable','vehicleTable','statusTable'].forEach(id => {
+        if ($.fn.DataTable.isDataTable('#' + id)) {
+          $('#' + id).DataTable().destroy();
+          $('#' + id).empty();
+        }
+      });
+    }
+    
+    function updateAllTables() {
+      destroyAllTables();
+      buildMatrixTable();
+      buildOnlineTable();
+      buildSimpleMatrix('tripsTable', 'completed_orders', 'Trips');
+      buildSimpleMatrix('loginTable', 'total_login_hours', 'Login Hrs');
+      buildSimpleMatrix('kmTable', 'trip_ops_odo', 'KM');
+      buildVehicleTable();
+      buildStatusTable();
+    }
+    
+    // Build pivot structure: Map driver_id -> {info, dates: {date: row}}
+    function getDriverPivot() {
+      const data = window.filteredData;
+      const pivot = new Map();
+      
+      data.forEach(row => {
+        if (!pivot.has(row.driver_id)) {
+          pivot.set(row.driver_id, {
+            id: row.driver_id,
+            name: row.driver_name || '',
+            sap: row.driver_sap_profile_id || '',
+            group: row.group_id || '',
+            team: row.team_id || '',
+            status: row.current_driver_status || '',
+            vehicle: row.Driver_Car_Status || '',
+            dates: {}
+          });
+        }
+        const d = pivot.get(row.driver_id);
+        d.dates[row.d_date] = row;
+        // Keep latest status/vehicle
+        if (row.d_date >= (d._lastDate || '')) {
+          d.status = row.current_driver_status || d.status;
+          d.vehicle = row.Driver_Car_Status || d.vehicle;
+          d._lastDate = row.d_date;
+        }
+      });
+      return pivot;
+    }
+    
+    function buildMatrixTable() {
+      const dates = getSelectedDates().length ? getSelectedDates() : window.uniqueDates;
+      const pivot = getDriverPivot();
+      
+      // Columns
+      const columns = [
+        { title: 'Driver Name', data: 'name' },
+        { title: 'SAP ID', data: 'sap' },
+        { title: 'Team Leader', data: 'group' },
+        { title: 'Supervisor', data: 'team' },
+        { title: 'Status', data: 'status' },
+      ];
+      
+      dates.forEach(d => {
+        columns.push({
+          title: d,
+          data: null,
+          orderable: false,
+          render: function(data, type, row) {
+            const r = row.dates[d];
+            if (!r) return '<span class="text-gray-300">—</span>';
+            const login = r.total_login_hours;
+            const trips = r.completed_orders;
+            const km = r.trip_ops_odo;
+            const online = isOnline(r);
+            const low = online && login < 2;
+            const cls = !online ? 'status-offline' : (low ? 'status-low' : 'status-online');
+            const label = !online ? 'OFF' : (low ? 'LOW' : 'ON');
+            return `<div class="matrix-cell ${cls} rounded px-1 py-0.5 text-center">
+              <div class="font-bold">${label}</div>
+              <div>${login.toFixed(1)}h • ${trips}t</div>
+              <div>${km.toFixed(0)}km</div>
+            </div>`;
+          }
+        });
+      });
+      
+      columns.push(
+        { title: 'Days Online', data: 'daysOnline' },
+        { title: 'Days Offline', data: 'daysOffline' },
+        { title: 'Total Trips', data: 'totalTrips' },
+        { title: 'Total KM', data: 'totalKM' },
+        { title: 'Total Login Hrs', data: 'totalLogin' }
+      );
+      
+      const rows = [];
+      pivot.forEach(d => {
+        let daysOnline = 0, daysOffline = 0, totalTrips = 0, totalKM = 0, totalLogin = 0;
+        dates.forEach(date => {
+          const r = d.dates[date];
+          if (r) {
+            if (isOnline(r)) daysOnline++; else daysOffline++;
+            totalTrips += r.completed_orders;
+            totalKM += r.trip_ops_odo;
+            totalLogin += r.total_login_hours;
+          }
+        });
+        rows.push({
+          name: d.name,
+          sap: d.sap,
+          group: d.group,
+          team: d.team,
+          status: d.status,
+          dates: d.dates,
+          daysOnline, daysOffline, totalTrips, totalKM: +totalKM.toFixed(1), totalLogin: +totalLogin.toFixed(1)
+        });
+      });
+      
+      window.dataTable = $('#matrixTable').DataTable({
+        data: rows,
+        columns: columns,
+        pageLength: 25,
+        scrollX: true,
+        order: [[columns.length - 3, 'desc']], // sort by total trips
+        dom: 'Bfrtip',
+        buttons: ['csvHtml5', 'excelHtml5'],
+        language: { emptyTable: 'No drivers match the current filters.' }
+      });
+    }
+    
+    function buildOnlineTable() {
+      const dates = getSelectedDates().length ? getSelectedDates() : window.uniqueDates;
+      const pivot = getDriverPivot();
+      
+      const columns = [
+        { title: 'Driver Name', data: 'name' },
+        { title: 'SAP ID', data: 'sap' },
+        { title: 'Supervisor', data: 'team' },
+        { title: 'Status', data: 'status' },
+        { title: 'Days Online', data: 'daysOnline' },
+        { title: 'Days Offline', data: 'daysOffline' },
+        { title: 'Offline Dates', data: 'offlineList' }
+      ];
+      
+      const rows = [];
+      pivot.forEach(d => {
+        let daysOnline = 0, daysOffline = 0;
+        const offlineDates = [];
+        dates.forEach(date => {
+          const r = d.dates[date];
+          if (r) {
+            if (isOnline(r)) daysOnline++;
+            else { daysOffline++; offlineDates.push(date); }
+          }
+        });
+        rows.push({
+          name: d.name, sap: d.sap, team: d.team, status: d.status,
+          daysOnline, daysOffline,
+          offlineList: offlineDates.join(', ') || '—'
+        });
+      });
+      
+      $('#onlineTable').DataTable({
+        data: rows,
+        columns: columns,
+        pageLength: 25,
+        order: [[5, 'desc']],
+        dom: 'Bfrtip',
+        buttons: ['csvHtml5'],
+        language: { emptyTable: 'No data' }
+      });
+    }
+    
+    function buildSimpleMatrix(tableId, metricKey, label) {
+      const dates = getSelectedDates().length ? getSelectedDates() : window.uniqueDates;
+      const pivot = getDriverPivot();
+      
+      const columns = [
+        { title: 'Driver Name', data: 'name' },
+        { title: 'SAP ID', data: 'sap' },
+        { title: 'Supervisor', data: 'team' },
+      ];
+      dates.forEach(d => {
+        columns.push({
+          title: d,
+          data: null,
+          render: (data, type, row) => {
+            const r = row.dates[d];
+            if (!r) return '—';
+            const v = parseNumber(r[metricKey]);
+            return metricKey.includes('hours') || metricKey.includes('odo') ? v.toFixed(1) : v;
+          }
+        });
+      });
+      columns.push({ title: 'Total', data: 'total' });
+      
+      const rows = [];
+      pivot.forEach(d => {
+        let total = 0;
+        const dateVals = {};
+        dates.forEach(date => {
+          const r = d.dates[date];
+          const v = r ? parseNumber(r[metricKey]) : 0;
+          dateVals[date] = v;
+          total += v;
+        });
+        rows.push({
+          name: d.name, sap: d.sap, team: d.team,
+          dates: d.dates,
+          total: metricKey.includes('hours') || metricKey.includes('odo') ? +total.toFixed(1) : total
+        });
+      });
+      
+      $('#' + tableId).DataTable({
+        data: rows,
+        columns: columns,
+        pageLength: 25,
+        scrollX: true,
+        order: [[columns.length - 1, 'desc']],
+        dom: 'Bfrtip',
+        buttons: ['csvHtml5'],
+        language: { emptyTable: 'No data' }
+      });
+    }
+    
+    function buildVehicleTable() {
+      const dates = getSelectedDates().length ? getSelectedDates() : window.uniqueDates;
+      const pivot = getDriverPivot();
+      
+      const columns = [
+        { title: 'Driver Name', data: 'name' },
+        { title: 'SAP ID', data: 'sap' },
+        { title: 'Supervisor', data: 'team' },
+        { title: 'Current Vehicle', data: 'vehicle' },
+      ];
+      dates.forEach(d => {
+        columns.push({
+          title: d,
+          data: null,
+          render: (data, type, row) => {
+            const r = row.dates[d];
+            if (!r) return '—';
+            const v = r.Driver_Car_Status || '—';
+            const cls = v === 'Assigned' ? 'text-green-600' : 'text-red-500';
+            return `<span class="${cls}">${v}</span>`;
+          }
+        });
+      });
+      
+      const rows = [...pivot.values()].map(d => ({
+        name: d.name, sap: d.sap, team: d.team, vehicle: d.vehicle, dates: d.dates
+      }));
+      
+      $('#vehicleTable').DataTable({
+        data: rows,
+        columns: columns,
+        pageLength: 25,
+        scrollX: true,
+        dom: 'Bfrtip',
+        buttons: ['csvHtml5']
+      });
+    }
+    
+    function buildStatusTable() {
+      const dates = getSelectedDates().length ? getSelectedDates() : window.uniqueDates;
+      const pivot = getDriverPivot();
+      
+      const columns = [
+        { title: 'Driver Name', data: 'name' },
+        { title: 'SAP ID', data: 'sap' },
+        { title: 'Supervisor', data: 'team' },
+        { title: 'Current Status', data: 'status' },
+      ];
+      dates.forEach(d => {
+        columns.push({
+          title: d,
+          data: null,
+          render: (data, type, row) => {
+            const r = row.dates[d];
+            if (!r) return '—';
+            const s = r.current_driver_status || '—';
+            let cls = 'bg-gray-100 text-gray-700';
+            if (s === 'ACTIVATED') cls = 'bg-green-100 text-green-800';
+            else if (s === 'DEACTIVATED') cls = 'bg-red-100 text-red-800';
+            else if (s === 'BANNED') cls = 'bg-purple-100 text-purple-800';
+            return `<span class="px-2 py-0.5 rounded text-xs ${cls}">${s}</span>`;
+          }
+        });
+      });
+      
+      const rows = [...pivot.values()].map(d => ({
+        name: d.name, sap: d.sap, team: d.team, status: d.status, dates: d.dates
+      }));
+      
+      $('#statusTable').DataTable({
+        data: rows,
+        columns: columns,
+        pageLength: 25,
+        scrollX: true,
+        dom: 'Bfrtip',
+        buttons: ['csvHtml5']
+      });
+    }
+
+    // ==================== TABS ====================
+    
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => {
+          b.classList.remove('tab-active');
+          b.classList.add('text-gray-500', 'dark:text-gray-400');
+        });
+        btn.classList.add('tab-active');
+        btn.classList.remove('text-gray-500', 'dark:text-gray-400');
+        
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+        document.getElementById('tab-' + btn.dataset.tab).classList.remove('hidden');
+        
+        // Redraw charts if switching to overview (canvas may have been hidden)
+        if (btn.dataset.tab === 'overview' && window.driverData.length) {
+          setTimeout(updateCharts, 50);
+        }
+      });
+    });
+
+  </script>
+</body>
+</html>
